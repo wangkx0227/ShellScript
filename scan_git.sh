@@ -11,6 +11,7 @@ if [ ! -d ${path} ];then
     fi
 else
     cd ${path}
+    git pull
     if [ $(git rev-list HEAD...${branch} --count) -gt 0 ]; then
         echo "仓库有新的更新！"
     else
