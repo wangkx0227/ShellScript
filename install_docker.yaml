@@ -1,4 +1,4 @@
-- name: install docker or ntpdate
+- name: install docker or ntpdate(适用于centos，内核版本3.10.0)
   hosts: k8s
   tasks:
     - name: install ntpdate
