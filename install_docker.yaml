@@ -1,0 +1,57 @@
+- name: install docker or ntpdate
+  hosts: k8s
+  tasks:
+    - name: install ntpdate
+      yum: 
+        name: ntpdate
+        state: installed
+    - name: set up ntp crontab
+      cron:
+        name: 'crontab ntp'
+        job: /usr/sbin/ntpdate  -u ntp.ubuntu.com
+        minute: "*/5"
+    - name: clean up source
+      yum:
+        name:
+          - docker
+          - docker-common
+          - docker-selinux
+          - docker-engine
+        state: removed
+    - name: install docker rely on
+      yum:
+        name: 
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+        state: installed
+    - name: 开启网桥过滤功能
+      shell: "sed -i 's/CONFIG_BRIDGE_NETFILTER=m/CONFIG_BRIDGE_NETFILTER=y/' /boot/config-3.10.0-1160.el7.x86_64"
+    - name: 加载内核模块
+      shell: "modprobe br_netfilter"
+    - name: set up docker source
+      shell: 
+        "wget -O /etc/yum.repos.d/docker-ce.repo https://download.docker.com/linux/centos/docker-ce.repo && sed -i 's#download.docker.com#mirrors.tuna.tsinghua.edu.cn/docker-ce#g'  /etc/yum.repos.d/docker-ce.repo"
+    - name: update yum source
+      shell: "yum clean all && yum makecache"
+    - name: write sysctl
+      shell: 
+        "echo 'net.ipv4.ip_forward = 1\nnet.bridge.bridge-nf-call-iptables = 1\nnet.bridge.bridge-nf-call-ip6tables = 1' > /etc/sysctl.conf && sysctl -p "
+    - name: install docker
+      yum: 
+        name: docker-ce
+        state: installed
+    - name: copy daemon json
+      copy: 
+        src: /etc/docker/daemon.json
+        dest: /etc/docker/daemon.json
+    - name: start docker
+      systemd:
+        name: docker
+        state: started
+    - name: print docker version
+      shell: "docker --version"
+      register: docker_version
+    - name: 
+      debug: 
+        msg: "{{ docker_version.stdout_lines }}"
