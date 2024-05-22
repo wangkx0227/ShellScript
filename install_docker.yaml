@@ -1,5 +1,5 @@
 - name: install docker or ntpdate(适用于centos，内核版本3.10.0)
-  hosts: k8s
+  hosts: docker
   tasks:
     - name: install ntpdate
       yum: 
@@ -45,6 +45,10 @@
       file: 
         path: /etc/docker/daemon.json
         state: touch
+    - name: wirte content to the file
+      lineinfile:
+        path: /etc/docker/daemon.json
+        line: '设置加速源' 
     - name: start docker
       systemd:
         name: docker
