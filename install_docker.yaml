@@ -41,10 +41,10 @@
       yum: 
         name: docker-ce
         state: installed
-    - name: copy daemon json
-      copy: 
-        src: /etc/docker/daemon.json
-        dest: /etc/docker/daemon.json
+    - name: create daemon json
+      file: 
+        path: /etc/docker/daemon.json
+        state: touch
     - name: start docker
       systemd:
         name: docker
